@@ -18,4 +18,3 @@ collection = db.restaurants
 for document in collection.find({'borough': 'Bronx'}, {'name': 1, '_id': 0}).limit(3):
     print(document)
 
-
