@@ -24,12 +24,31 @@ def menu_func():
 
     return choose
 
+def connection_with_db():
+    client = MongoClient()
+    db = client.test
+    collection = db.restaurants
+    return db, collection
+
+def id_searching():
+    restaurant_id = input("Podaj ID restauracji: ")
+    db, collection = connection_with_db()
+    for document in collection.find({"restaurant_id": restaurant_id}):
+        print(document)
+
+def zipcode_searching():
+    zipcode = input("Podaj kod pocztowy restauracji: ")
+    db, collection = connection_with_db()
+    for document in collection.find({"address.zipcode": zipcode}).limit(20):
+        print(document)
 
 def menu_func_2(choose):
     if choose == 1:
-        print("Podaj ID restauracji: ")
+        print("Wybrano wyszukiwanie po ID restauracji.")
+        id_searching()
     if choose == 2:
-        print("Podaj kod pocztowy restauracji")
+        print("Wybrano wyszukiwanie po kodzie pocztowym restauracji")
+        zipcode_searching()
     if choose == 3:
         print("Podaj nazwę restauracji")
     if choose == 4:
@@ -38,6 +57,7 @@ def menu_func_2(choose):
         print("Wyszukiwanie restauracji serwującej daną kuchnię")
     if choose == 6:
         print("Wyszukiwanie restauracji z najwyższą liczbą punktów")
+
 
 
 if __name__ == '__main__':
