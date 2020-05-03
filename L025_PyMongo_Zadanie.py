@@ -1,4 +1,7 @@
 from pymongo import MongoClient
+import pymongo
+import re
+from pprint import pprint
 
 # tworzenie połączenia
 client = MongoClient()
@@ -42,6 +45,37 @@ def zipcode_searching():
     for document in collection.find({"address.zipcode": zipcode}).limit(20):
         print(document)
 
+def name_searching():
+    name = input("Podaj nazwę restauracji: ")
+    regex_name = re.compile(f"^{name}", re.IGNORECASE)
+    db, collection = connection_with_db()
+    found_restaurants_number = 0
+    for document in collection.find({"name": regex_name}):
+        found_restaurants_number += 1
+    print(f"\nŁączna liczba restauracji spełniająca kryteria wyszukiwania: {found_restaurants_number}")
+
+    answer = "tak"
+    num_skip = 0
+    while answer == "tak":
+        for document in collection.find({"name": regex_name}).skip(num_skip).limit(num_skip + 20):
+            print(document)
+
+        print(f"Wyświetlono restauracje od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
+        num_skip += 20
+        answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
+
+def coordinates_searching():
+    coorX = float(input("Podaj pierwszą współrzędną: "))
+    coorY = float(input("Podaj drugą współrzędną: "))
+    dist = float(input("Podaj zakres przeszukiwania: "))
+
+    db, collection = connection_with_db()
+    # for document in collection.find({"address": { "$elemMatch": {"coord": {"$gt": -73.0, "$lt": -74.0}} } }, {"address.coord": 1, "name":1}):
+    for document in collection.find({"address.coord": {"$lt": coorX + dist, "$gt": coorX - dist} }, {"address.coord": 1, "name":1}):
+    # for document in collection.find({"grades.score": {"$gt": 80, "$lt": 100} }, {"grades.score": 1, "name":1}):
+        print(document)
+
+
 def menu_func_2(choose):
     if choose == 1:
         print("Wybrano wyszukiwanie po ID restauracji.")
@@ -50,9 +84,11 @@ def menu_func_2(choose):
         print("Wybrano wyszukiwanie po kodzie pocztowym restauracji")
         zipcode_searching()
     if choose == 3:
-        print("Podaj nazwę restauracji")
+        print("Wybrano wyszukiwanie po nazwie restauracji")
+        name_searching()
     if choose == 4:
         print("Wyszukiwanie restauracji w twojej okolicy")
+        coordinates_searching()
     if choose == 5:
         print("Wyszukiwanie restauracji serwującej daną kuchnię")
     if choose == 6:
