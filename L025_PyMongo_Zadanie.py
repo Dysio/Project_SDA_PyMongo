@@ -95,19 +95,22 @@ def kitchen_borough_search():
     cuisine = input("Podaj kuchnie: ").capitalize()
     print(cuisine)
     if cuisine == "American":
-        cuisine == "American "
+        cuisine = cuisine + " "
     print(cuisine)
+
     condition_borough = input("Czy chcesz podać dzielnice? tak/nie: ")
     if condition_borough == "tak":
         borough = input("Podaj dzielnice: ").capitalize()
+
     found_restaurants_number = 0
     db, collection = connection_with_db()
-    for document in collection.find({"cuisine": cuisine}):
-        found_restaurants_number += 1
 
     answer = "tak"
     num_skip = 0
     if condition_borough == "tak":
+        for document in collection.find({"cuisine": cuisine, "borough": borough}):
+            found_restaurants_number += 1
+
         while answer == "tak":
             for document in collection.find({"cuisine": cuisine, "borough":borough}).skip(num_skip).limit(num_skip + 20):
                 print(document)
@@ -118,6 +121,9 @@ def kitchen_borough_search():
                 break
             answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
     else:
+        for document in collection.find({"cuisine": cuisine}):
+            found_restaurants_number += 1
+
         while answer == "tak":
             for document in collection.find({"cuisine": cuisine}).skip(num_skip).limit(num_skip + 20):
                 print(document)
