@@ -62,6 +62,9 @@ def name_searching():
 
         print(f"Wyświetlono restauracje od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
         num_skip += 20
+        if num_skip > found_restaurants_number:
+            print("Brak więcej wyników do wyświetlenia.")
+            break
         answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
 
 def coordinates_searching():
@@ -70,10 +73,62 @@ def coordinates_searching():
     dist = float(input("Podaj zakres przeszukiwania: "))
 
     db, collection = connection_with_db()
-    # for document in collection.find({"address": { "$elemMatch": {"coord": {"$gt": -73.0, "$lt": -74.0}} } }, {"address.coord": 1, "name":1}):
-    for document in collection.find({"address.coord": {"$lt": coorX + dist, "$gt": coorX - dist} }, {"address.coord": 1, "name":1}):
-    # for document in collection.find({"grades.score": {"$gt": 80, "$lt": 100} }, {"grades.score": 1, "name":1}):
-        print(document)
+    found_restaurants_number = 0
+    for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
+                                     "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}},
+                                    {"address.coord": 1, "name": 1}):
+        found_restaurants_number += 1
+
+    answer = "tak"
+    num_skip = 0
+    while answer == "tak":
+        for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)}, "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}  }, {"address.coord": 1, "name":1}).skip(num_skip).limit(num_skip + 20):
+            print(document)
+        print(f"Wyświetlono restauracje od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
+        num_skip += 20
+        if num_skip > found_restaurants_number:
+            print("Brak więcej wyników do wyświetlenia.")
+            break
+        answer = input("Czy chcesz zobaczyć kolejne 20 restauracji tak/nie?").lower().strip()
+
+def kitchen_borough_search():
+    cuisine = input("Podaj kuchnie: ").capitalize()
+    print(cuisine)
+    if cuisine == "American":
+        cuisine == "American "
+    print(cuisine)
+    condition_borough = input("Czy chcesz podać dzielnice? tak/nie: ")
+    if condition_borough == "tak":
+        borough = input("Podaj dzielnice: ").capitalize()
+    found_restaurants_number = 0
+    db, collection = connection_with_db()
+    for document in collection.find({"cuisine": cuisine}):
+        found_restaurants_number += 1
+
+    answer = "tak"
+    num_skip = 0
+    if condition_borough == "tak":
+        while answer == "tak":
+            for document in collection.find({"cuisine": cuisine, "borough":borough}).skip(num_skip).limit(num_skip + 20):
+                print(document)
+            print(f"Wyświetlono restauracjie od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
+            num_skip += 20
+            if num_skip > found_restaurants_number:
+                print("Brak więcej wyników do wyświetlenia.")
+                break
+            answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
+    else:
+        while answer == "tak":
+            for document in collection.find({"cuisine": cuisine}).skip(num_skip).limit(num_skip + 20):
+                print(document)
+            print(f"Wyświetlono restauracjie od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
+            num_skip += 20
+            if num_skip > found_restaurants_number:
+                print("Brak więcej wyników do wyświetlenia.")
+                break
+            answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
+
+
 
 
 def menu_func_2(choose):
@@ -91,6 +146,7 @@ def menu_func_2(choose):
         coordinates_searching()
     if choose == 5:
         print("Wyszukiwanie restauracji serwującej daną kuchnię")
+        kitchen_borough_search()
     if choose == 6:
         print("Wyszukiwanie restauracji z najwyższą liczbą punktów")
 
