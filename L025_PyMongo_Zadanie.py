@@ -43,11 +43,11 @@ def zipcode_searching():
     zipcode = input("Podaj kod pocztowy restauracji: ")
     db, collection = connection_with_db()
     for document in collection.find({"address.zipcode": zipcode}).limit(20):
-        print(document)
+        pprint(document)
 
 def name_searching():
     name = input("Podaj nazwę restauracji: ")
-    regex_name = re.compile(f"^{name}", re.IGNORECASE)
+    regex_name = re.compile(f"(^|.){name}", re.IGNORECASE)
     db, collection = connection_with_db()
     found_restaurants_number = 0
     for document in collection.find({"name": regex_name}):
@@ -82,7 +82,9 @@ def coordinates_searching():
     answer = "tak"
     num_skip = 0
     while answer == "tak":
-        for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)}, "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}  }, {"address.coord": 1, "name":1}).skip(num_skip).limit(num_skip + 20):
+        for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
+                                         "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}  },
+                                        {"address.coord": 1, "name":1}).skip(num_skip).limit(num_skip + 20):
             print(document)
         print(f"Wyświetlono restauracje od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
         num_skip += 20
@@ -91,7 +93,7 @@ def coordinates_searching():
             break
         answer = input("Czy chcesz zobaczyć kolejne 20 restauracji tak/nie?").lower().strip()
 
-def kitchen_borough_search():
+def kitchen_borough_searching():
     cuisine = input("Podaj kuchnie: ").capitalize()
     print(cuisine)
     if cuisine == "American":
@@ -100,7 +102,7 @@ def kitchen_borough_search():
 
     condition_borough = input("Czy chcesz podać dzielnice? tak/nie: ")
     if condition_borough == "tak":
-        borough = input("Podaj dzielnice: ").capitalize()
+        borough = input("Podaj dzielnicę: ").capitalize()
 
     found_restaurants_number = 0
     db, collection = connection_with_db()
@@ -135,6 +137,14 @@ def kitchen_borough_search():
             answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
 
 
+def borough_searching():
+    borough = input("Podaj dzielnicę: ")
+    numberX = int(input("Podaj ile najlepszych restauracji chcesz zobaczyć: "))
+
+    db, collection = connection_with_db()
+
+    for document in collection.find({"borough": borough}).sort([("grades.score", -1)]).limit(numberX):
+        print(document)
 
 
 def menu_func_2(choose):
@@ -152,9 +162,10 @@ def menu_func_2(choose):
         coordinates_searching()
     if choose == 5:
         print("Wyszukiwanie restauracji serwującej daną kuchnię")
-        kitchen_borough_search()
+        kitchen_borough_searching()
     if choose == 6:
         print("Wyszukiwanie restauracji z najwyższą liczbą punktów")
+        borough_searching()
 
 
 
