@@ -49,7 +49,7 @@ def name_searching():
     regex_name = re.compile(f"(^|.){name}", re.IGNORECASE)
     db, collection = connection_with_db()
     found_restaurants_number = 0
-    for document in collection.find({"name": regex_name}):
+    for _ in collection.find({"name": regex_name}):
         found_restaurants_number += 1
     print(f"\nŁączna liczba restauracji spełniająca kryteria wyszukiwania: {found_restaurants_number}")
 
@@ -73,7 +73,7 @@ def coordinates_searching():
 
     db, collection = connection_with_db()
     found_restaurants_number = 0
-    for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
+    for _ in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
                                      "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}}):
         found_restaurants_number += 1
 
@@ -106,7 +106,7 @@ def kitchen_borough_searching():
     answer = "tak"
     num_skip = 0
     if condition_borough == "tak":
-        for document in collection.find({"cuisine": cuisine, "borough": borough}):
+        for _ in collection.find({"cuisine": cuisine, "borough": borough}):
             found_restaurants_number += 1
 
         while answer == "tak":
@@ -119,7 +119,7 @@ def kitchen_borough_searching():
                 break
             answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
     else:
-        for document in collection.find({"cuisine": cuisine}):
+        for _ in collection.find({"cuisine": cuisine}):
             found_restaurants_number += 1
 
         while answer == "tak":
