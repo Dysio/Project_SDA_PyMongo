@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import pymongo
 import re
 from pprint import pprint
 
@@ -21,9 +20,9 @@ def menu_func():
     try:
         choose = int(input('Wybierz interesującą Cie opcję: '))
     except ValueError:
-        raise ValueError('Poadana wartość musi być cyfrą!')
+        raise ValueError('Podana wartość musi być cyfrą!')
     if choose not in (1,2,3,4,5,6):
-        raise ValueError('Poadana wartość musi być cyfrą od 1 do 6!')
+        raise ValueError('Podana wartość musi być cyfrą od 1 do 6!')
 
     return choose
 
@@ -75,8 +74,7 @@ def coordinates_searching():
     db, collection = connection_with_db()
     found_restaurants_number = 0
     for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
-                                     "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}},
-                                    {"address.coord": 1, "name": 1}):
+                                     "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}}):
         found_restaurants_number += 1
 
     answer = "tak"
@@ -84,7 +82,7 @@ def coordinates_searching():
     while answer == "tak":
         for document in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
                                          "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}  },
-                                        {"address.coord": 1, "name":1}).skip(num_skip).limit(num_skip + 20):
+                                        ).skip(num_skip).limit(num_skip + 20):
             print(document)
         print(f"Wyświetlono restauracje od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
         num_skip += 20
@@ -95,10 +93,8 @@ def coordinates_searching():
 
 def kitchen_borough_searching():
     cuisine = input("Podaj kuchnie: ").capitalize()
-    print(cuisine)
     if cuisine == "American":
         cuisine = cuisine + " "
-    print(cuisine)
 
     condition_borough = input("Czy chcesz podać dzielnice? tak/nie: ")
     if condition_borough == "tak":
