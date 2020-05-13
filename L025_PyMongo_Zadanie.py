@@ -48,9 +48,8 @@ def name_searching():
     name = input("Podaj nazwę restauracji: ")
     regex_name = re.compile(f"(^|.){name}", re.IGNORECASE)
     db, collection = connection_with_db()
-    found_restaurants_number = 0
-    for _ in collection.find({"name": regex_name}):
-        found_restaurants_number += 1
+
+    found_restaurants_number = collection.count_documents({"name": regex_name})
     print(f"\nŁączna liczba restauracji spełniająca kryteria wyszukiwania: {found_restaurants_number}")
 
     answer = "tak"
@@ -72,10 +71,9 @@ def coordinates_searching():
     dist = float(input("Podaj zakres przeszukiwania: "))
 
     db, collection = connection_with_db()
-    found_restaurants_number = 0
-    for _ in collection.find({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
-                                     "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}}):
-        found_restaurants_number += 1
+
+    found_restaurants_number = collection.count_documents({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
+                                     "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}})
 
     answer = "tak"
     num_skip = 0
@@ -100,14 +98,13 @@ def kitchen_borough_searching():
     if condition_borough == "tak":
         borough = input("Podaj dzielnicę: ").capitalize()
 
-    found_restaurants_number = 0
     db, collection = connection_with_db()
 
     answer = "tak"
     num_skip = 0
     if condition_borough == "tak":
-        for _ in collection.find({"cuisine": cuisine, "borough": borough}):
-            found_restaurants_number += 1
+
+        found_restaurants_number = collection.count_documents({"cuisine": cuisine, "borough": borough})
 
         while answer == "tak":
             for document in collection.find({"cuisine": cuisine, "borough":borough}).skip(num_skip).limit(num_skip + 20):
@@ -119,8 +116,8 @@ def kitchen_borough_searching():
                 break
             answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
     else:
-        for _ in collection.find({"cuisine": cuisine}):
-            found_restaurants_number += 1
+
+        found_restaurants_number = collection.count_documents({"cuisine": cuisine})
 
         while answer == "tak":
             for document in collection.find({"cuisine": cuisine}).skip(num_skip).limit(num_skip + 20):
