@@ -46,16 +46,19 @@ def zipcode_searching():
 
 def name_searching():
     name = input("Podaj nazwę restauracji: ")
-    regex_name = re.compile(f"(^|.){name}", re.IGNORECASE)
+    # regex_name = re.compile(f"(^|.){name}", re.IGNORECASE)
+
     db, collection = connection_with_db()
 
-    found_restaurants_number = collection.count_documents({"name": regex_name})
+    # found_restaurants_number = collection.count_documents({"name": regex_name})
+    found_restaurants_number = collection.count_documents({'name': {'$regex':f'(^|.){name}', '$options':'-i'}})
     print(f"\nŁączna liczba restauracji spełniająca kryteria wyszukiwania: {found_restaurants_number}")
 
     answer = "tak"
     num_skip = 0
     while answer == "tak":
-        for document in collection.find({"name": regex_name}).skip(num_skip).limit(num_skip + 20):
+        # for document in collection.find({"name": regex_name}).skip(num_skip).limit(num_skip + 20):
+        for document in collection.find({"name": {"$regex": f"(^|.){name}", "$options":"-i"}}).skip(num_skip).limit(num_skip + 20):
             print(document)
 
         print(f"Wyświetlono restauracje od {num_skip} do {num_skip + 20} z {found_restaurants_number}")
