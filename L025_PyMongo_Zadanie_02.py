@@ -38,23 +38,19 @@ def answer_func():
         answer = input("Czy chcesz zobaczyć kolejne 20 restauraji tak/nie?").lower().strip()
     return answer
 
-def id_searching():
+def id_searching(collection):
     restaurant_id = input("Podaj ID restauracji: ")
-    db, collection = connection_with_db()
     for document in collection.find({"restaurant_id": restaurant_id}):
         print(document)
 
-def zipcode_searching():
+def zipcode_searching(collection):
     zipcode = input("Podaj kod pocztowy restauracji: ")
-    db, collection = connection_with_db()
     for document in collection.find({"address.zipcode": zipcode}).limit(20):
         pprint(document)
 
-def name_searching():
+def name_searching(collection):
     name = input("Podaj nazwę restauracji: ")
     # regex_name = re.compile(f"(^|.){name}", re.IGNORECASE)
-
-    db, collection = connection_with_db()
 
     # found_restaurants_number = collection.count_documents({"name": regex_name})
     found_restaurants_number = collection.count_documents({'name': {'$regex':f'(^|.){name}', '$options':'-i'}})
@@ -75,12 +71,10 @@ def name_searching():
 
         answer = answer_func()
 
-def coordinates_searching():
+def coordinates_searching(collection):
     coorX = float(input("Podaj pierwszą współrzędną: "))
     coorY = float(input("Podaj drugą współrzędną: "))
     dist = float(input("Podaj zakres przeszukiwania: "))
-
-    db, collection = connection_with_db()
 
     found_restaurants_number = collection.count_documents({"address.coord.0": {"$gt": (coorX - dist), "$lt": (coorX + dist)},
                                      "address.coord.1": {"$gt": (coorY - dist), "$lt": (coorY + dist)}})
@@ -100,7 +94,7 @@ def coordinates_searching():
 
         answer = answer_func()
 
-def kitchen_borough_searching():
+def kitchen_borough_searching(collection):
     cuisine = input("Podaj kuchnie: ").capitalize()
     if cuisine == "American":
         cuisine = cuisine + " "
@@ -108,8 +102,6 @@ def kitchen_borough_searching():
     condition_borough = input("Czy chcesz podać dzielnice? tak/nie: ")
     if condition_borough == "tak":
         borough = input("Podaj dzielnicę: ").capitalize()
-
-    db, collection = connection_with_db()
 
     answer = "tak"
     num_skip = 0
@@ -141,35 +133,37 @@ def kitchen_borough_searching():
             answer = answer_func()
 
 
-def borough_searching():
+def borough_searching(collection):
     borough = input("Podaj dzielnicę: ")
     numberX = int(input("Podaj ile najlepszych restauracji chcesz zobaczyć: "))
-
-    db, collection = connection_with_db()
 
     for document in collection.find({"borough": borough}).sort([("grades.score", -1)]).limit(numberX):
         print(document)
 
 
 def menu_func_2(choose):
+    client = MongoClient()
+    db = client.test
+    collection = db.restaurants
+
     if choose == '1':
         print("Wybrano wyszukiwanie po ID restauracji.")
-        id_searching()
+        id_searching(collection)
     if choose == '2':
         print("Wybrano wyszukiwanie po kodzie pocztowym restauracji")
-        zipcode_searching()
+        zipcode_searching(collection)
     if choose == '3':
         print("Wybrano wyszukiwanie po nazwie restauracji")
-        name_searching()
+        name_searching(collection)
     if choose == '4':
         print("Wyszukiwanie restauracji w twojej okolicy")
-        coordinates_searching()
+        coordinates_searching(collection)
     if choose == '5':
         print("Wyszukiwanie restauracji serwującej daną kuchnię")
-        kitchen_borough_searching()
+        kitchen_borough_searching(collection)
     if choose == '6':
         print("Wyszukiwanie restauracji z najwyższą liczbą punktów")
-        borough_searching()
+        borough_searching(collection)
 
 
 
